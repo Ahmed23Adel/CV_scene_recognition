@@ -15,6 +15,8 @@ import imageio
 import numpy as np
 from skimage import color, feature
 from scipy.spatial.distance import cdist
+from scipy.spatial.distance import cdist
+from scipy.stats import mode
 
 def get_tiny_images(image_paths):
     """
@@ -352,6 +354,23 @@ def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats)
     Useful functions:
         scipy.spatial.distance.cdist, np.argsort, scipy.stats.mode
     """
+    k = 1
+
+    # Gets the distance between each test image feature and each train image feature
+    # e.g., cdist
+    distances = cdist(test_image_feats, train_image_feats, 'euclidean')
+
+    # Find the k closest features to each test image feature in euclidean space
+    k_nearest_labels = np.take(train_labels, distances.argsort()[:, :k])
+
+    # Determine the mode (most common) label of those k features
+    mode_labels = mode(k_nearest_labels, axis=1)
+
+    # Store the predicted labels in a list
+    predicted_labels = mode_labels.mode.squeeze().tolist()
+
+    return predicted_labels
+
 
     k = 1
 
